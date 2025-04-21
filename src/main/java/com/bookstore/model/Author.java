@@ -12,22 +12,11 @@ public class Author {
         this.authorName = authorName;
         this.biography = biography;
     }
-    public int getAuthorId() {
-        return authorId;
-    }
-    public void setAuthorId(int authorId) {
-        this.authorId = authorId;
-    }
-    public String getAuthorName() {
-        return authorName;
-    }
-    public void setAuthorName(String authorName) {
-        this.authorName = authorName;
-    }
-    public String getBiography() {
-        return biography;
-    }
-    public void setBiography(String biography) {
-        this.biography = biography;
-    }
+
+    public int getAuthorId() { return authorId; }
+    public void setAuthorId(int authorId) { this.authorId = authorId; }
+    public String getAuthorName() { return authorName; }
+    public void setAuthorName(String authorName) { this.authorName = authorName; }
+    public String getBiography() { return biography; }
+    public void setBiography(String biography) { this.biography = biography; }
 }
