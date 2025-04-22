@@ -18,6 +18,14 @@ public class CartResource {
     public Response addCartItem(
             @PathParam("customerId") int customerId,
             CartItem item) {
+
+        //Input Validation
+        if (item.getIsbn() == null || item.getIsbn().isBlank()) {
+            throw new InvalidInputException("ISBN cannot be null or empty");
+        }
+        if (item.getQuantity() <= 0) {
+            throw new InvalidInputException("Quantity cannot be less than 0");
+        }
         Cart cart = cartStore.computeIfAbsent(customerId, k -> new Cart(customerId));
         cart.addItem(item);
         return Response.status(Response.Status.CREATED).entity(cart).build();
@@ -40,6 +48,11 @@ public class CartResource {
             @PathParam("customerId") int customerId,
             @PathParam("isbn") String isbn,
             int quantity) {
+
+        //Input Validation
+        if (quantity <= 0) {
+            throw new InvalidInputException("Quantity cannot be less than 0");
+        }
         Cart cart = cartStore.get(customerId);
         if (cart == null) throw new CartNotFoundException("Cart not found for customer");
         cart.updateItem(isbn, quantity);

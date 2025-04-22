@@ -1,5 +1,6 @@
 package com.bookstore.resource;
 
+import com.bookstore.exception.InvalidInputException;
 import com.bookstore.model.Customer;
 import com.bookstore.exception.CustomerNotFoundException;
 import jakarta.ws.rs.*;
@@ -16,6 +17,13 @@ public class CustomerResource {
 
     @POST
     public Response createCustomer(Customer customer) {
+        //Input validations
+        if(customer.getCustomerName() == null || customer.getCustomerName().isBlank()) {
+            throw new InvalidInputException("Customer name cannot be null or empty.");
+        }
+        if(customer.getEmail() == null || customer.getEmail().isBlank()) {
+            throw new InvalidInputException("Email cannot be null or empty.");
+        }
         int id = customerIdCounter++;
         customer.setCustomerId(id);
         customerStore.put(id, customer);
@@ -34,6 +42,14 @@ public class CustomerResource {
     @Path("/{id}")
     public Response updateCustomer(@PathParam("id") int id, Customer updatedCustomer) {
         if (!customerStore.containsKey(id)) throw new CustomerNotFoundException("Customer with ID " + id + " does not exist.");
+
+        //Input validation
+        if(updatedCustomer.getCustomerName() == null || updatedCustomer.getCustomerName().isBlank()) {
+            throw new InvalidInputException("Customer name cannot be null or empty.");
+        }
+        if(updatedCustomer.getEmail() == null || updatedCustomer.getEmail().isBlank()) {
+            throw new InvalidInputException("Email cannot be null or empty.");
+        }
         updatedCustomer.setCustomerId(id);
         customerStore.put(id, updatedCustomer);
         return Response.ok(updatedCustomer).build();

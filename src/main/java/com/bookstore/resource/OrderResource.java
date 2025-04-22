@@ -17,13 +17,23 @@ public class OrderResource {
     @POST
     public Response placeOrder(@PathParam("customerId") int customerId) {
         Cart cart = CartResource.getCartStore().get(customerId);
-        if (cart == null || cart.getItems().isEmpty())
-            throw new CartNotFoundException("Cannot place order with an empty cart.");
+
+        if (cart == null)
+            throw new CartNotFoundException("Cart not found for customer with ID " + customerId);
+
+        if (cart.getItems().isEmpty())
+            throw new InvalidInputException("Cannot place order with an empty cart.");
 
         double totalAmount = 0.0;
         List<OrderItem> orderItems = new ArrayList<>();
 
         for (CartItem item : cart.getItems()) {
+            if (item.getIsbn() == null || item.getIsbn().isBlank())
+                throw new InvalidInputException("Invalid ISBN in cart item.");
+
+            if (item.getQuantity() <= 0)
+                throw new InvalidInputException("Quantity must be greater than 0 for ISBN: " + item.getIsbn());
+
             Book book = BookResource.bookStore.values().stream()
                     .filter(b -> b.getIsbn().equals(item.getIsbn()))
                     .findFirst()
@@ -41,6 +51,7 @@ public class OrderResource {
 
         Order order = new Order(orderIdCounter++, customerId, new Date(), totalAmount, orderItems);
         orderStore.computeIfAbsent(customerId, k -> new ArrayList<>()).add(order);
+
         cart.getItems().clear();
         return Response.status(Response.Status.CREATED).entity(order).build();
     }
@@ -49,7 +60,7 @@ public class OrderResource {
     public Response getOrders(@PathParam("customerId") int customerId) {
         List<Order> orders = orderStore.get(customerId);
         if (orders == null || orders.isEmpty())
-            throw new CustomerNotFoundException("No orders found for customer.");
+            throw new OrderNotFoundException("No orders found for customer ID " + customerId);
         return Response.ok(orders).build();
     }
 
@@ -60,16 +71,17 @@ public class OrderResource {
             @PathParam("orderId") int orderId) {
         List<Order> orders = orderStore.get(customerId);
         if (orders != null) {
-            Optional<Order> order = orders.stream()
+            return orders.stream()
                     .filter(o -> o.getOrderId() == orderId)
-                    .findFirst();
-            if (order.isPresent()) return Response.ok(order.get()).build();
+                    .findFirst()
+                    .map(Response::ok)
+                    .orElseThrow(() -> new OrderNotFoundException("Order with ID " + orderId + " not found for customer " + customerId))
+                    .build();
         }
-        throw new CustomerNotFoundException("Order with ID " + orderId + " not found.");
+        throw new CustomerNotFoundException("Customer with ID " + customerId + " has no orders.");
     }
 
     public static Map<Integer, List<Order>> getOrderStore() {
         return orderStore;
     }
 }
-

@@ -1,5 +1,6 @@
 package com.bookstore.resource;
 
+import com.bookstore.exception.InvalidInputException;
 import com.bookstore.model.Author;
 import com.bookstore.exception.AuthorNotFoundException;
 import jakarta.ws.rs.*;
@@ -16,6 +17,14 @@ public class AuthorResource {
 
     @POST
     public Response createAuthor(Author author) {
+
+        //Input Validation
+        if(author.getAuthorName() == null || author.getAuthorName().isBlank()) {
+            throw new InvalidInputException("Author name cannot be empty");
+        }
+        if(author.getBiography() == null || author.getBiography().isBlank()) {
+            throw new InvalidInputException("Biography cannot be empty");
+        }
         int id = authorIdCounter++;
         author.setAuthorId(id);
         authorStore.put(id, author);
@@ -38,7 +47,14 @@ public class AuthorResource {
     @PUT
     @Path("/{id}")
     public Response updateAuthor(@PathParam("id") int id, Author updatedAuthor) {
-        if (!authorStore.containsKey(id)) throw new AuthorNotFoundException("Author with ID " + id + " does not exist.");
+        if (!authorStore.containsKey(id)) { throw new AuthorNotFoundException("Author with ID " + id + " does not exist.");
+        }
+        if (updatedAuthor.getAuthorName() == null || updatedAuthor.getAuthorName().isBlank()) {
+            throw new InvalidInputException("Author name cannot be empty");
+        }
+        if (updatedAuthor.getBiography() == null || updatedAuthor.getBiography().isBlank()) {
+            throw new InvalidInputException("Biography cannot be empty");
+        }
         updatedAuthor.setAuthorId(id);
         authorStore.put(id, updatedAuthor);
         return Response.ok(updatedAuthor).build();

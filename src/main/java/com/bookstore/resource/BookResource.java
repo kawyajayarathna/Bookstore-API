@@ -16,8 +16,18 @@ public class BookResource {
 
     @POST
     public Response createBook(Book book) {
+        //Input Validation
+        if(book.getTitle() == null || book.getTitle().isBlank()) {
+            throw new InvalidInputException("Title cannot be empty");
+        }
+        if (book.getIsbn() == null || book.getIsbn().isBlank()) {
+            throw new InvalidInputException("Isbn cannot be empty");
+        }
         if (book.getPublicationYear() > Calendar.getInstance().get(Calendar.YEAR)) {
             throw new InvalidInputException("Publication year cannot be in the future.");
+        }
+        if (book.getAuthorId() <= 0){
+            throw new InvalidInputException("Author ID must be a positive integer.");
         }
         int id = bookIdCounter++;
         book.setBookId(id);
@@ -42,6 +52,19 @@ public class BookResource {
     @Path("/{id}")
     public Response updateBook(@PathParam("id") int id, Book updatedBook) {
         if (!bookStore.containsKey(id)) throw new BookNotFoundException("Book with ID " + id + " does not exist.");
+
+        if(updatedBook.getTitle() == null || updatedBook.getTitle().isBlank()) {
+            throw new InvalidInputException("Title cannot be empty");
+        }
+        if(updatedBook.getIsbn() == null || updatedBook.getIsbn().isBlank()) {
+            throw new InvalidInputException("Isbn cannot be empty");
+        }
+        if(updatedBook.getPublicationYear() > Calendar.getInstance().get(Calendar.YEAR)) {
+            throw new InvalidInputException("Publication year cannot be in the future.");
+        }
+        if(updatedBook.getAuthorId() <= 0){
+            throw new InvalidInputException("Author ID must be a positive integer.");
+        }
         updatedBook.setBookId(id);
         bookStore.put(id, updatedBook);
         return Response.ok(updatedBook).build();
@@ -51,7 +74,7 @@ public class BookResource {
     @Path("/{id}")
     public Response deleteBook(@PathParam("id") int id) {
         Book removed = bookStore.remove(id);
-        if (removed == null) throw new BookNotFoundException("Book with ID " + id + " does not exist.");
+        if (removed == null) {throw new BookNotFoundException("Book with ID " + id + " does not exist."); }
         return Response.ok(Map.of("message", "Book with ID " + id + " was deleted")).build();
     }
 
