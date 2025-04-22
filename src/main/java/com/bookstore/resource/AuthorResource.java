@@ -25,6 +25,16 @@ public class AuthorResource {
         if(author.getBiography() == null || author.getBiography().isBlank()) {
             throw new InvalidInputException("Biography cannot be empty");
         }
+
+        //Check if author with the same name already exists
+        for (Author existingAuthor : authorStore.values()) {
+            if(existingAuthor.getAuthorName().equalsIgnoreCase(author.getAuthorName())) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity(Map.of("error", "Author'" + author.getAuthorName() + "' already exists with ID:" +existingAuthor.getAuthorId()))
+                        .build();
+            }
+        }
+        //Save new author
         int id = authorIdCounter++;
         author.setAuthorId(id);
         authorStore.put(id, author);
