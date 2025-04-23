@@ -24,6 +24,10 @@ public class CustomerResource {
         if(customer.getEmail() == null || customer.getEmail().isBlank()) {
             throw new InvalidInputException("Email cannot be null or empty.");
         }
+        if (customer.getPassword() == null || customer.getPassword().isBlank()) {
+            throw new InvalidInputException("Password cannot be null or empty.");
+        }
+
         int id = customerIdCounter++;
         customer.setCustomerId(id);
         customerStore.put(id, customer);
@@ -50,6 +54,10 @@ public class CustomerResource {
         if(updatedCustomer.getEmail() == null || updatedCustomer.getEmail().isBlank()) {
             throw new InvalidInputException("Email cannot be null or empty.");
         }
+        if (updatedCustomer.getPassword() == null || updatedCustomer.getPassword().isBlank()) {
+            throw new InvalidInputException("Password cannot be null or empty.");
+        }
+
         updatedCustomer.setCustomerId(id);
         customerStore.put(id, updatedCustomer);
         return Response.ok(updatedCustomer).build();
