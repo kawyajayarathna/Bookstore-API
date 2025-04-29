@@ -12,4 +12,3 @@ The main goal of this project is to demonstrate how the API behaves in different
 - Order placements
 - Error handling
 
-[📥 Download Postman Collection](https://raw.githubusercontent.com/kawyajayarathna/Bookstore/master/Book%20Collection.postman_collection.json)
