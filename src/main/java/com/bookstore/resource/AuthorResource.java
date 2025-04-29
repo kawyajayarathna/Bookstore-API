@@ -77,4 +77,6 @@ public class AuthorResource {
         if (removed == null) throw new AuthorNotFoundException("Author with ID " + id + " does not exist.");
         return Response.ok(Map.of("message", "Author with ID " + id + " was deleted")).build();
     }
+
+
 }

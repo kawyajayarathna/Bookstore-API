@@ -14,4 +14,5 @@ public class CartItem {
     public void setIsbn(String isbn) { this.isbn = isbn; }
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
+
 }

@@ -16,8 +16,8 @@ public class Cart {
         items.add(item);
     }
 
-    public void removeItem(String isbn) {
-        items.removeIf(i -> i.getIsbn().equals(isbn));
+    public boolean removeItem(String isbn) {
+        return items.removeIf(i -> i.getIsbn().equals(isbn));
     }
 
     public void updateItem(String isbn, int quantity) {
@@ -26,9 +26,14 @@ public class Cart {
                 .findFirst()
                 .ifPresent(i -> i.setQuantity(quantity));
     }
+    public void updateItem(CartItem item) {
+        updateItem(item.getIsbn(), item.getQuantity());
+    }
+
 
     public int getCustomerId() { return customerId; }
     public void setCustomerId(int customerId) { this.customerId = customerId; }
     public List<CartItem> getItems() { return items; }
     public void setItems(List<CartItem> items) { this.items = items; }
+
 }

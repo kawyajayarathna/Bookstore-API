@@ -17,11 +17,18 @@ public class CustomerResource {
 
     @POST
     public Response createCustomer(Customer customer) {
-        //Input validations
-        if(customer.getCustomerName() == null || customer.getCustomerName().isBlank()) {
+        // Check for duplicate email
+        for (Customer existingCustomer : customerStore.values()) {
+            if (existingCustomer.getEmail().equalsIgnoreCase(customer.getEmail())) {
+                throw new InvalidInputException("Email already exists. Please use a different email.");
+            }
+        }
+
+        // Input validations
+        if (customer.getCustomerName() == null || customer.getCustomerName().isBlank()) {
             throw new InvalidInputException("Customer name cannot be null or empty.");
         }
-        if(customer.getEmail() == null || customer.getEmail().isBlank()) {
+        if (customer.getEmail() == null || customer.getEmail().isBlank()) {
             throw new InvalidInputException("Email cannot be null or empty.");
         }
         if (customer.getPassword() == null || customer.getPassword().isBlank()) {
@@ -42,12 +49,17 @@ public class CustomerResource {
         return Response.ok(customer).build();
     }
 
+    @GET
+    public Response getAllCustomers() {
+        return Response.ok(new ArrayList<>(customerStore.values())).build();
+    }
+
     @PUT
     @Path("/{id}")
     public Response updateCustomer(@PathParam("id") int id, Customer updatedCustomer) {
         if (!customerStore.containsKey(id)) throw new CustomerNotFoundException("Customer with ID " + id + " does not exist.");
 
-        //Input validation
+        // Input validation
         if(updatedCustomer.getCustomerName() == null || updatedCustomer.getCustomerName().isBlank()) {
             throw new InvalidInputException("Customer name cannot be null or empty.");
         }

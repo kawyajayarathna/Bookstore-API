@@ -16,7 +16,7 @@ public class OrderResource {
 
     @POST
     public Response placeOrder(@PathParam("customerId") int customerId) {
-        Cart cart = CartResource.getCartStore().get(customerId);
+        Cart cart = (Cart) CartResource.getCartStore().get(customerId);
 
         if (cart == null)
             throw new CartNotFoundException("Cart not found for customer with ID " + customerId);
@@ -27,6 +27,8 @@ public class OrderResource {
         double totalAmount = 0.0;
         List<OrderItem> orderItems = new ArrayList<>();
 
+        // Group cart items by ISBN and sum their quantities
+        Map<String, Integer> totalQuantities = new HashMap<>();
         for (CartItem item : cart.getItems()) {
             if (item.getIsbn() == null || item.getIsbn().isBlank())
                 throw new InvalidInputException("Invalid ISBN in cart item.");
@@ -34,13 +36,29 @@ public class OrderResource {
             if (item.getQuantity() <= 0)
                 throw new InvalidInputException("Quantity must be greater than 0 for ISBN: " + item.getIsbn());
 
+            totalQuantities.merge(item.getIsbn(), item.getQuantity(), Integer::sum);
+        }
+
+        // Validate total stock availability
+        for (Map.Entry<String, Integer> entry : totalQuantities.entrySet()) {
+            String isbn = entry.getKey();
+            int requestedQuantity = entry.getValue();
+
+            Book book = BookResource.bookStore.values().stream()
+                    .filter(b -> b.getIsbn().equals(isbn))
+                    .findFirst()
+                    .orElseThrow(() -> new BookNotFoundException("Book with ISBN " + isbn + " does not exist."));
+
+            if (book.getStock() < requestedQuantity)
+                throw new OutOfStockException("Not enough stock for book: " + book.getTitle());
+        }
+
+        // If all stock is valid, proceed with order creation
+        for (CartItem item : cart.getItems()) {
             Book book = BookResource.bookStore.values().stream()
                     .filter(b -> b.getIsbn().equals(item.getIsbn()))
                     .findFirst()
                     .orElseThrow(() -> new BookNotFoundException("Book with ISBN " + item.getIsbn() + " does not exist."));
-
-            if (book.getStock() < item.getQuantity())
-                throw new OutOfStockException("Not enough stock for book: " + book.getTitle());
 
             totalAmount += book.getPrice() * item.getQuantity();
             orderItems.add(new OrderItem(book.getIsbn(), item.getQuantity(), book.getPrice()));
@@ -85,3 +103,6 @@ public class OrderResource {
         return orderStore;
     }
 }
+
+
+
